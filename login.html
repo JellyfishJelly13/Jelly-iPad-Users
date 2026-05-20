@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>iPad User Login</title>
+
+  <style>
+    /* 
+      Apple Account Web Design System
+      Auto-switches based on device Light/Dark mode settings
+    */
+    :root {
+      /* Light Mode Variables */
+      --page-bg: #F5F5F7;
+      --card-bg: #FFFFFF;
+      --text-primary: #1D1D1F;
+      --text-secondary: #86868B;
+      --border-color: #D2D2D7;
+      --input-bg: #FFFFFF;
+      --focus-ring: #0071E3;
+      --btn-bg: #0071E3;
+      --btn-hover: #0077ED;
+      --error-color: #FF3B30;
+      --success-color: #34C759;
+      --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        /* Dark Mode Variables */
+        --page-bg: #000000;
+        --card-bg: #1C1C1E;
+        --text-primary: #F5F5F7;
+        --text-secondary: #86868B;
+        --border-color: #424245;
+        --input-bg: #1C1C1E; 
+        --focus-ring: #2997FF;
+        --btn-bg: #2997FF;
+        --btn-hover: #3E9EFF;
+        --card-shadow: none;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--page-bg);
+      color: var(--text-primary);
+      display: flex;
+      height: 100vh;
+      align-items: center;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 420px;
+      min-height: 400px;
+      padding: 48px 40px;
+      border-radius: 18px;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+      margin: 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Screen Views */
+    .view {
+      display: none; /* Hidden by default */
+      animation: fadeIn 0.4s ease-out;
+      width: 100%;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      margin: 0 0 32px 0;
+      font-size: 15px;
+      color: var(--text-secondary);
+      letter-spacing: -0.01em;
+      line-height: 1.4;
+    }
+
+    /* Floating Label Inputs */
+    .input-container {
+      position: relative;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .apple-input {
+      width: 100%;
+      height: 56px;
+      padding: 22px 16px 6px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: 17px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      font-family: inherit;
+    }
+
+    .apple-input:focus {
+      border-color: var(--focus-ring);
+      box-shadow: 0 0 0 1px var(--focus-ring);
+    }
+
+    .apple-label {
+      position: absolute;
+      left: 17px;
+      top: 18px;
+      font-size: 17px;
+      color: var(--text-secondary);
+      pointer-events: none;
+      transition: all 0.2s ease-out;
+    }
+
+    .apple-input:focus ~ .apple-label,
+    .apple-input:not(:placeholder-shown) ~ .apple-label {
+      top: 8px;
+      font-size: 12px;
+    }
+
+    button {
+      width: 100%;
+      height: 50px;
+      margin-top: 16px;
+      border-radius: 12px;
+      border: none;
+      background: var(--btn-bg);
+      color: #FFFFFF;
+      font-size: 17px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s;
+    }
+
+    button:hover { background: var(--btn-hover); }
+    button:active { transform: scale(0.98); }
+
+    #status {
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      min-height: 20px;
+      transition: color 0.3s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+    .shake { animation: shake 0.4s ease-in-out; }
+
+    /* Processing Screen Elements */
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border-color);
+      border-top: 4px solid var(--focus-ring);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 24px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Success Screen Elements */
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      fill: var(--success-color);
+      margin: 0 auto 24px auto;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="card" id="login-card">
+    
+    <!-- ==================== SCREEN 1: LOGIN ==================== -->
+    <div id="view-login" class="view active">
+
+      <h1>Log In</h1>
+      <p class="subtitle">Enter your username and password below.</p>
+
+      <div class="input-container">
+        <input id="username" class="apple-input" placeholder=" " autocapitalize="none" autocomplete="off">
+        <label class="apple-label">Username</label>
+      </div>
+
+      <div class="input-container">
+        <input id="password" type="password" class="apple-input" placeholder=" ">
+        <label class="apple-label">Password</label>
+      </div>
+
+      <button onclick="login()">Log In</button>
+      <div id="status"></div>
+    </div>
+
+    <!-- ==================== SCREEN 2: PROCESSING ==================== -->
+    <div id="view-processing" class="view">
+      <div class="spinner"></div>
+      <h1>Processing...</h1>
+      <p class="subtitle">Securely authenticating your account.</p>
+    </div>
+
+    <!-- ==================== SCREEN 3: SUCCESS ==================== -->
+    <div id="view-success" class="view">
+      <svg class="success-icon" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      </svg>
+      <h1>Log In Complete</h1>
+      <p class="subtitle">Your identity has been verified.<br><br><b>You can now safely close this window.</b></p>
+    </div>
+
+  </div>
+
+<script>
+// ==========================================
+// SETTINGS
+// ==========================================
+const DB = "https://jelly-ipad-users-default-rtdb.firebaseio.com/";
+
+// ⏳ Change this number to control how long the processing screen stays visible
+// 2000 = 2 seconds, 3000 = 3 seconds, etc.
+const PROCESSING_SCREEN_DURATION = 2000; 
+// ==========================================
+
+// Add event listeners for the 'Enter' key
+document.getElementById("username").addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault(); // Prevents default form submission if any
+    login();
+  }
+});
+
+document.getElementById("password").addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault(); // Prevents default form submission if any
+    login();
+  }
+});
+
+
+function switchScreen(viewId) {
+  document.getElementById("view-login").classList.remove("active");
+  document.getElementById("view-processing").classList.remove("active");
+  document.getElementById("view-success").classList.remove("active");
+  
+  document.getElementById(viewId).classList.add("active");
+}
+
+function showError(msg) {
+  const status = document.getElementById("status");
+  const card = document.getElementById("login-card");
+  
+  status.style.color = "var(--error-color)";
+  status.innerText = msg;
+  
+  // Shake animation
+  card.classList.remove("shake");
+  void card.offsetWidth; // Trigger reflow to restart animation
+  card.classList.add("shake");
+}
+
+async function login() {
+  const user = document.getElementById("username").value.trim();
+  const pass = document.getElementById("password").value;
+  const status = document.getElementById("status");
+  const card = document.getElementById("login-card");
+
+  card.classList.remove("shake");
+  status.style.color = "var(--text-secondary)";
+  status.innerText = "Connecting...";
+
+  if (!user || !pass) {
+    showError("Please enter your username and password.");
+    return;
+  }
+
+  try {
+    // 1. Fetch user data (Still on the Login Screen)
+    const res = await fetch(`${DB}users/${user}.json`);
+    const data = await res.json();
+
+    if (!data) {
+      showError("This Account was not found.");
+      return;
+    }
+
+    if (data.password !== pass) {
+      showError("Incorrect password.");
+      return;
+    }
+
+    // ====================================================
+    // ✅ PASSWORD IS CORRECT - START VISUAL FLOW
+    // ====================================================
+    
+    // Switch to Processing Screen
+    switchScreen("view-processing");
+
+    // 2. Do the Firebase session setup in the background
+    const setSession = fetch(`${DB}sessions/${user}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(true)
+    });
+
+    // 3. Force the screen to stay visible for EXACTLY the duration you specified above
+    const waitTimer = new Promise(resolve => setTimeout(resolve, PROCESSING_SCREEN_DURATION));
+
+    // Wait for both the database update AND the 2-second timer to finish
+    await Promise.all([setSession, waitTimer]);
+
+    // 4. Switch to the final Confirmation Screen
+    switchScreen("view-success");
+    console.log("Session successfully set:", user);
+
+  } catch (err) {
+    console.error(err);
+    // If an error happens midway, bring them back to the login screen and show error
+    switchScreen("view-login");
+    showError("A connection error occurred. Try again.");
+  }
+}
+</script>
+
+</body>
+</html>
