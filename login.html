@@ -7,46 +7,40 @@
 
   <style>
     /* 
-      Apple Account Web Design System
+      Apple iOS/iPadOS Design System
       Auto-switches based on device Light/Dark mode settings
     */
     :root {
-      /* Light Mode Variables */
       --page-bg: #F5F5F7;
       --card-bg: #FFFFFF;
       --text-primary: #1D1D1F;
       --text-secondary: #86868B;
       --border-color: #D2D2D7;
-      --input-bg: #FFFFFF;
-      --focus-ring: #0071E3;
-      --btn-bg: #0071E3;
-      --btn-hover: #0077ED;
-      --error-color: #FF3B30;
+      --key-bg: rgba(0, 0, 0, 0.08);
+      --key-active: rgba(0, 0, 0, 0.15);
       --success-color: #34C759;
-      --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      --avatar-bg: #8E8E93;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        /* Dark Mode Variables */
         --page-bg: #000000;
         --card-bg: #1C1C1E;
         --text-primary: #F5F5F7;
-        --text-secondary: #86868B;
-        --border-color: #424245;
-        --input-bg: #1C1C1E; 
-        --focus-ring: #2997FF;
-        --btn-bg: #2997FF;
-        --btn-hover: #3E9EFF;
-        --card-shadow: none;
+        --text-secondary: #98989D;
+        --border-color: #38383A;
+        --key-bg: rgba(255, 255, 255, 0.15);
+        --key-active: rgba(255, 255, 255, 0.25);
+        --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
       }
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; user-select: none; }
 
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Helvetica, Arial, sans-serif;
       background: var(--page-bg);
       color: var(--text-primary);
       display: flex;
@@ -59,10 +53,10 @@
     .card {
       background: var(--card-bg);
       width: 100%;
-      max-width: 420px;
-      min-height: 400px;
-      padding: 48px 40px;
-      border-radius: 18px;
+      max-width: 440px;
+      min-height: 550px;
+      padding: 40px 20px;
+      border-radius: 24px;
       box-shadow: var(--card-shadow);
       text-align: center;
       margin: 20px;
@@ -70,172 +64,246 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      overflow: hidden;
     }
 
     /* Screen Views */
     .view {
-      display: none; /* Hidden by default */
-      animation: fadeIn 0.4s ease-out;
+      display: none;
+      animation: fadeScale 0.3s ease-out forwards;
       width: 100%;
+      height: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
+    .view.active { display: flex; }
 
-    .view.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes fadeScale {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     h1 {
       margin: 0 0 8px 0;
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 600;
-      letter-spacing: -0.01em;
+      letter-spacing: 0.01em;
     }
 
     .subtitle {
-      margin: 0 0 32px 0;
+      margin: 0 0 30px 0;
       font-size: 15px;
       color: var(--text-secondary);
-      letter-spacing: -0.01em;
-      line-height: 1.4;
     }
 
-    /* Floating Label Inputs */
-    .input-container {
-      position: relative;
-      margin-bottom: 16px;
-      text-align: left;
-    }
-
-    .apple-input {
+    /* =========================================
+       SCREEN 1: USER LIST
+       ========================================= */
+    #user-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 20px;
       width: 100%;
-      height: 56px;
-      padding: 22px 16px 6px;
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      background: var(--input-bg);
-      color: var(--text-primary);
-      font-size: 17px;
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      font-family: inherit;
+      padding: 20px;
+      max-height: 400px;
+      overflow-y: auto;
     }
 
-    .apple-input:focus {
-      border-color: var(--focus-ring);
-      box-shadow: 0 0 0 1px var(--focus-ring);
-    }
-
-    .apple-label {
-      position: absolute;
-      left: 17px;
-      top: 18px;
-      font-size: 17px;
-      color: var(--text-secondary);
-      pointer-events: none;
-      transition: all 0.2s ease-out;
-    }
-
-    .apple-input:focus ~ .apple-label,
-    .apple-input:not(:placeholder-shown) ~ .apple-label {
-      top: 8px;
-      font-size: 12px;
-    }
-
-    button {
-      width: 100%;
-      height: 50px;
-      margin-top: 16px;
-      border-radius: 12px;
-      border: none;
-      background: var(--btn-bg);
-      color: #FFFFFF;
-      font-size: 17px;
-      font-weight: 400;
+    .user-profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       cursor: pointer;
-      transition: background 0.2s ease, transform 0.1s;
+      transition: transform 0.2s ease;
+    }
+    .user-profile:active { transform: scale(0.92); }
+
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--avatar-bg);
+      color: white;
+      font-size: 32px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    button:hover { background: var(--btn-hover); }
-    button:active { transform: scale(0.98); }
+    .user-name {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
 
-    #status {
-      margin-top: 24px;
-      font-size: 14px;
+    /* =========================================
+       SCREEN 2: PASSCODE
+       ========================================= */
+    .passcode-dots {
+      display: flex;
+      gap: 22px;
+      margin: 20px 0 40px 0;
+      height: 16px;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text-primary);
+      transition: background-color 0.1s, border-color 0.1s;
+    }
+    .dot.filled { background-color: var(--text-primary); }
+
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px 24px;
+      margin-top: 10px;
+    }
+
+    .num-key {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: var(--key-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+    .num-key:active { background: var(--key-active); }
+    
+    .num-key.empty { background: transparent; cursor: default; }
+    .num-key.action {
+      background: transparent;
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: -0.4px;
+    }
+    .num-key.action:active { opacity: 0.5; }
+
+    .num-main {
+      font-size: 34px;
+      font-weight: 400;
+      line-height: 1;
+      margin-top: 4px;
+    }
+    .num-sub {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
       color: var(--text-secondary);
-      min-height: 20px;
-      transition: color 0.3s ease;
+      height: 12px;
+      margin-top: 2px;
     }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-4px); }
-      40%, 80% { transform: translateX(4px); }
+      20%, 60% { transform: translateX(-15px); }
+      40%, 80% { transform: translateX(15px); }
     }
     .shake { animation: shake 0.4s ease-in-out; }
 
-    /* Processing Screen Elements */
+    /* =========================================
+       SCREEN 3 & 4: PROCESSING & SUCCESS
+       ========================================= */
     .spinner {
       width: 48px;
       height: 48px;
       border: 4px solid var(--border-color);
-      border-top: 4px solid var(--focus-ring);
+      border-top: 4px solid var(--text-secondary);
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin: 0 auto 24px auto;
+      margin-bottom: 24px;
     }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Success Screen Elements */
     .success-icon {
       width: 64px;
       height: 64px;
       fill: var(--success-color);
-      margin: 0 auto 24px auto;
+      margin-bottom: 24px;
     }
-
   </style>
 </head>
 
 <body>
 
-  <div class="card" id="login-card">
+  <div class="card" id="main-card">
     
-    <!-- ==================== SCREEN 1: LOGIN ==================== -->
-    <div id="view-login" class="view active">
-
-      <h1>Log In</h1>
-      <p class="subtitle">Enter your username and password below.</p>
-
-      <div class="input-container">
-        <input id="username" class="apple-input" placeholder=" " autocapitalize="none" autocomplete="off">
-        <label class="apple-label">Username</label>
+    <!-- ==================== SCREEN 1: USER LIST ==================== -->
+    <div id="view-users" class="view active">
+      <h1 id="user-greeting">Loading Users...</h1>
+      <p class="subtitle" id="user-subtitle">Please wait</p>
+      
+      <div id="user-grid">
+        <!-- Users will be injected here dynamically -->
       </div>
-
-      <div class="input-container">
-        <input id="password" type="password" class="apple-input" placeholder=" ">
-        <label class="apple-label">Password</label>
-      </div>
-
-      <button onclick="login()">Log In</button>
-      <div id="status"></div>
     </div>
 
-    <!-- ==================== SCREEN 2: PROCESSING ==================== -->
+    <!-- ==================== SCREEN 2: PASSCODE ==================== -->
+    <div id="view-passcode" class="view">
+      <h1 id="passcode-title">Enter Passcode</h1>
+      
+      <div class="passcode-dots" id="passcode-dots">
+        <!-- Dots injected based on password length -->
+      </div>
+
+      <div class="numpad">
+        <!-- Row 1 -->
+        <div class="num-key" onclick="pressKey('1')">
+          <span class="num-main">1</span><span class="num-sub"></span>
+        </div>
+        <div class="num-key" onclick="pressKey('2')">
+          <span class="num-main">2</span><span class="num-sub">ABC</span>
+        </div>
+        <div class="num-key" onclick="pressKey('3')">
+          <span class="num-main">3</span><span class="num-sub">DEF</span>
+        </div>
+        <!-- Row 2 -->
+        <div class="num-key" onclick="pressKey('4')">
+          <span class="num-main">4</span><span class="num-sub">GHI</span>
+        </div>
+        <div class="num-key" onclick="pressKey('5')">
+          <span class="num-main">5</span><span class="num-sub">JKL</span>
+        </div>
+        <div class="num-key" onclick="pressKey('6')">
+          <span class="num-main">6</span><span class="num-sub">MNO</span>
+        </div>
+        <!-- Row 3 -->
+        <div class="num-key" onclick="pressKey('7')">
+          <span class="num-main">7</span><span class="num-sub">PQRS</span>
+        </div>
+        <div class="num-key" onclick="pressKey('8')">
+          <span class="num-main">8</span><span class="num-sub">TUV</span>
+        </div>
+        <div class="num-key" onclick="pressKey('9')">
+          <span class="num-main">9</span><span class="num-sub">WXYZ</span>
+        </div>
+        <!-- Row 4 -->
+        <div class="num-key action" onclick="cancelPasscode()">Cancel</div>
+        <div class="num-key" onclick="pressKey('0')">
+          <span class="num-main">0</span><span class="num-sub"></span>
+        </div>
+        <div class="num-key action" onclick="deleteKey()">Delete</div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 3: PROCESSING ==================== -->
     <div id="view-processing" class="view">
       <div class="spinner"></div>
       <h1>Processing...</h1>
-      <p class="subtitle">Securely authenticating your account.</p>
+      <p class="subtitle">Securely authenticating</p>
     </div>
 
-    <!-- ==================== SCREEN 3: SUCCESS ==================== -->
+    <!-- ==================== SCREEN 4: SUCCESS ==================== -->
     <div id="view-success" class="view">
       <svg class="success-icon" viewBox="0 0 24 24">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -251,111 +319,177 @@
 // SETTINGS
 // ==========================================
 const DB = "https://jelly-ipad-users-default-rtdb.firebaseio.com/";
+const PROCESSING_SCREEN_DURATION = 2000; // 2 seconds
 
-// ⏳ Change this number to control how long the processing screen stays visible
-// 2000 = 2 seconds, 3000 = 3 seconds, etc.
-const PROCESSING_SCREEN_DURATION = 2000; 
+// State Variables
+let allUsers = {};
+let selectedUsername = "";
+let targetPassword = "";
+let currentPasscode = "";
+let currentView = "view-users";
+
+// Beautiful Apple UI colors for avatars
+const avatarColors = ["#FF3B30", "#FF9500", "#34C759", "#007AFF", "#5856D6", "#AF52DE"];
+
 // ==========================================
-
-// Add event listeners for the 'Enter' key
-document.getElementById("username").addEventListener("keypress", function(event) {
-  if (event.key === "Enter") {
-    event.preventDefault(); // Prevents default form submission if any
-    login();
-  }
-});
-
-document.getElementById("password").addEventListener("keypress", function(event) {
-  if (event.key === "Enter") {
-    event.preventDefault(); // Prevents default form submission if any
-    login();
-  }
-});
-
-
-function switchScreen(viewId) {
-  document.getElementById("view-login").classList.remove("active");
-  document.getElementById("view-processing").classList.remove("active");
-  document.getElementById("view-success").classList.remove("active");
-  
-  document.getElementById(viewId).classList.add("active");
-}
-
-function showError(msg) {
-  const status = document.getElementById("status");
-  const card = document.getElementById("login-card");
-  
-  status.style.color = "var(--error-color)";
-  status.innerText = msg;
-  
-  // Shake animation
-  card.classList.remove("shake");
-  void card.offsetWidth; // Trigger reflow to restart animation
-  card.classList.add("shake");
-}
-
-async function login() {
-  const user = document.getElementById("username").value.trim();
-  const pass = document.getElementById("password").value;
-  const status = document.getElementById("status");
-  const card = document.getElementById("login-card");
-
-  card.classList.remove("shake");
-  status.style.color = "var(--text-secondary)";
-  status.innerText = "Connecting...";
-
-  if (!user || !pass) {
-    showError("Please enter your username and password.");
-    return;
-  }
-
+// INITIALIZATION
+// ==========================================
+window.onload = async () => {
   try {
-    // 1. Fetch user data (Still on the Login Screen)
-    const res = await fetch(`${DB}users/${user}.json`);
-    const data = await res.json();
-
-    if (!data) {
-      showError("This Account was not found.");
-      return;
-    }
-
-    if (data.password !== pass) {
-      showError("Incorrect password.");
-      return;
-    }
-
-    // ====================================================
-    // ✅ PASSWORD IS CORRECT - START VISUAL FLOW
-    // ====================================================
+    const res = await fetch(`${DB}users.json`);
+    allUsers = await res.json();
     
-    // Switch to Processing Screen
-    switchScreen("view-processing");
+    document.getElementById("user-greeting").innerText = "Select User";
+    document.getElementById("user-subtitle").innerText = "Choose an account to continue";
+    
+    const grid = document.getElementById("user-grid");
+    grid.innerHTML = ""; // Clear loader
 
-    // 2. Do the Firebase session setup in the background
-    const setSession = fetch(`${DB}sessions/${user}.json`, {
+    let colorIndex = 0;
+
+    for (const username in allUsers) {
+      const initial = username.charAt(0).toUpperCase();
+      const color = avatarColors[colorIndex % avatarColors.length];
+      
+      const userDiv = document.createElement("div");
+      userDiv.className = "user-profile";
+      userDiv.onclick = () => selectUser(username);
+      userDiv.innerHTML = `
+        <div class="avatar" style="background: ${color}">${initial}</div>
+        <div class="user-name">${username}</div>
+      `;
+      grid.appendChild(userDiv);
+      colorIndex++;
+    }
+  } catch (err) {
+    document.getElementById("user-greeting").innerText = "Connection Error";
+    document.getElementById("user-subtitle").innerText = "Could not load users.";
+    console.error(err);
+  }
+};
+
+// ==========================================
+// NAVIGATION
+// ==========================================
+function switchScreen(viewId) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  currentView = viewId;
+}
+
+// ==========================================
+// PASSCODE LOGIC
+// ==========================================
+function selectUser(username) {
+  selectedUsername = username;
+  targetPassword = allUsers[username].password; // We fetch the actual length
+  currentPasscode = "";
+  
+  // Create exactly as many dots as the user's actual password
+  const dotsContainer = document.getElementById("passcode-dots");
+  dotsContainer.innerHTML = "";
+  for (let i = 0; i < targetPassword.length; i++) {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsContainer.appendChild(dot);
+  }
+
+  switchScreen("view-passcode");
+}
+
+function cancelPasscode() {
+  currentPasscode = "";
+  switchScreen("view-users");
+}
+
+function updateDots() {
+  const dots = document.getElementById("passcode-dots").children;
+  for (let i = 0; i < dots.length; i++) {
+    if (i < currentPasscode.length) {
+      dots[i].classList.add("filled");
+    } else {
+      dots[i].classList.remove("filled");
+    }
+  }
+}
+
+function pressKey(char) {
+  if (currentPasscode.length < targetPassword.length) {
+    currentPasscode += char;
+    updateDots();
+
+    // Auto-evaluate when string lengths match (like real iPad)
+    if (currentPasscode.length === targetPassword.length) {
+      // Slight delay to let the last dot fill visually
+      setTimeout(verifyPasscode, 100);
+    }
+  }
+}
+
+function deleteKey() {
+  if (currentPasscode.length > 0) {
+    currentPasscode = currentPasscode.slice(0, -1);
+    updateDots();
+  }
+}
+
+// Listen for physical keyboard typing
+document.addEventListener('keydown', (e) => {
+  if (currentView !== 'view-passcode') return;
+  
+  // Accepts numbers, and letters (if password happens to have letters)
+  if (e.key.length === 1) {
+    pressKey(e.key);
+  } else if (e.key === 'Backspace') {
+    deleteKey();
+  } else if (e.key === 'Escape') {
+    cancelPasscode();
+  }
+});
+
+async function verifyPasscode() {
+  if (currentPasscode === targetPassword) {
+    // PASSCODE CORRECT - Trigger success flow
+    switchScreen("view-processing");
+    completeLogin();
+  } else {
+    // WRONG PASSCODE - Apple Shake Animation
+    const dotsContainer = document.getElementById("passcode-dots");
+    dotsContainer.classList.remove("shake");
+    void dotsContainer.offsetWidth; // Trigger reflow
+    dotsContainer.classList.add("shake");
+    
+    // Vibrate device if supported
+    if(navigator.vibrate) navigator.vibrate(200);
+
+    // Clear passcode after shake finishes
+    setTimeout(() => {
+      currentPasscode = "";
+      updateDots();
+    }, 400);
+  }
+}
+
+async function completeLogin() {
+  try {
+    const setSession = fetch(`${DB}sessions/${selectedUsername}.json`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(true)
     });
 
-    // 3. Force the screen to stay visible for EXACTLY the duration you specified above
+    // Wait for DB + the 2-second UI delay
     const waitTimer = new Promise(resolve => setTimeout(resolve, PROCESSING_SCREEN_DURATION));
-
-    // Wait for both the database update AND the 2-second timer to finish
     await Promise.all([setSession, waitTimer]);
 
-    // 4. Switch to the final Confirmation Screen
     switchScreen("view-success");
-    console.log("Session successfully set:", user);
-
   } catch (err) {
     console.error(err);
-    // If an error happens midway, bring them back to the login screen and show error
-    switchScreen("view-login");
-    showError("A connection error occurred. Try again.");
+    alert("Network error updating session. Please try again.");
+    cancelPasscode(); // send back to start
   }
 }
-</script>
 
+</script>
 </body>
 </html>
